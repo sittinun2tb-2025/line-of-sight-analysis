@@ -1,0 +1,5 @@
+numpy
+matplotlib
+pyproj
+shapely>=2.0
+rasterio    # เฉพาะ run-demo-dem.py (วิเคราะห์ร่วมกับ DEM)

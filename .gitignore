@@ -1,0 +1,7 @@
+# DEM ต้นทางระดับประเทศ (7.6 GB) — เกินลิมิตไฟล์ของ GitHub (100 MB)
+# ใช้ dem.tif (crop แล้ว) ที่ commit ไว้ใน repo แทน
+DEM_T_UTM47.tif
+SRTM15p_v21_Thai.tif
+
+__pycache__/
+*.pyc
