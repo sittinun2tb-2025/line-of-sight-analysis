@@ -143,19 +143,16 @@ class ViewshedAnalysis:
     
 
     def export_geojson(self, output_path):
+        """ส่งออกผล viewshed เป็น GeoJSON polygon grid ตาม RFC 7946:
+        - พิกัดเป็น WGS84 lon/lat เสมอ จึงไม่มี member "crs" (spec ปัจจุบันตัดออกแล้ว)
+        - exterior ring เรียงทวนเข็มนาฬิกา (right-hand rule) และปิด ring
+        - grid_id ใส่เป็น Feature "id" ตาม spec และคงไว้ใน properties เพื่อให้เห็นในตาราง GIS
+        - พิกัดปัดทศนิยม 6 ตำแหน่ง (~0.1 ม.) ตามที่ spec แนะนำ
+        ("name" ระดับ FeatureCollection เป็น foreign member ที่ spec อนุญาต — QGIS ใช้เป็นชื่อ layer)"""
         to_wgs = Transformer.from_crs(UTM_EPSG, "EPSG:4326", always_xy=True)
-        outputDict = {
-            "type": "FeatureCollection",
-            "name": "Viewshed_Grid_Result",
-            "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::4326"}},
-            "features": []
-        }
-        featureList = []
 
-        # มุมของแต่ละ cell คำนวณใน UTM เมตร แล้วค่อยแปลงเป็น WGS84
-        # เรียงทวนเข็มนาฬิกาตาม right-hand rule ของ RFC 7946
         if self.visible_rect is not None:
-            # Rectangle grid: สี่เหลี่ยม 4 มุม (LL -> LR -> UR -> UL)
+            # Rectangle grid: สี่เหลี่ยม 4 มุม (LL -> LR -> UR -> UL = ทวนเข็ม)
             mask = self.visible_rect != -1   # ตัด cell นอกรัศมีศึกษาออก
             grid_ids = np.arange(self.visible_rect.size).reshape(self.visible_rect.shape)[mask]
             vis_vals = self.visible_rect[mask]
@@ -165,7 +162,7 @@ class ViewshedAnalysis:
             corner_y = np.stack([cy - half, cy - half, cy + half, cy + half], axis=1)
         elif self.visible_hex is not None:
             # Hexagonal grid: หกเหลี่ยม flat-top 6 มุม (vertex ที่มุม 0, 60, ..., 300 องศา
-            # รอบ center = ทวนเข็มนาฬิกา และ orientation ตรงกับ build_hex_grid)
+            # รอบ center = ทวนเข็ม และ orientation ตรงกับ build_hex_grid)
             grid_ids = np.arange(self.visible_hex.size)   # hex กรองในรัศมีไว้แล้ว ไม่มีค่า -1
             vis_vals = self.visible_hex
             cx, cy = self.hx, self.hy
@@ -185,36 +182,27 @@ class ViewshedAnalysis:
 
         n_corners = corner_x.shape[1]
         lons, lats = to_wgs.transform(corner_x.ravel(), corner_y.ravel())   # แปลงทุกมุมในคำสั่งเดียว
-        lons, lats = lons.reshape(-1, n_corners), lats.reshape(-1, n_corners)
+        lons = lons.round(6).reshape(-1, n_corners)
+        lats = lats.round(6).reshape(-1, n_corners)
 
-        for gid, v, w, lon4, lat4 in zip(grid_ids, vis_vals, weights, lons, lats):
-            feature = {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": []
-                },
-                "properties": {}
-            }
-
-            propertiesDict = {}
-            propertiesDict['grid_id'] = int(gid)
-            propertiesDict['visible'] = int(v)
-            propertiesDict['weight'] = int(w)
-
-            feature['properties'] = propertiesDict
-            ring = [[float('%.6f' % x), float('%.6f' % y)] for x, y in zip(lon4, lat4)]
+        features = []
+        for gid, v, w, lon_ring, lat_ring in zip(grid_ids, vis_vals, weights, lons, lats):
+            ring = [[float(x), float(y)] for x, y in zip(lon_ring, lat_ring)]
             ring.append(ring[0])   # ปิด ring: จุดสุดท้ายต้องซ้ำจุดแรก
-            feature['geometry']['coordinates'] = [ring]
-            featureList.append(feature)
+            features.append({
+                "type": "Feature",
+                "id": int(gid),
+                "geometry": {"type": "Polygon", "coordinates": [ring]},
+                "properties": {"grid_id": int(gid), "visible": int(v), "weight": int(w)},
+            })
 
-        outputDict['features'] = featureList
+        fc = {"type": "FeatureCollection", "name": "Viewshed_Grid_Result", "features": features}
         with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(outputDict, f, ensure_ascii=False)
+            json.dump(fc, f, ensure_ascii=False)
 
         # Summary Report
-        n_vis = sum(1 for feat in featureList if feat['properties']['visible'] == 1)
-        n_tot = len(featureList)
+        n_vis = sum(1 for feat in features if feat['properties']['visible'] == 1)
+        n_tot = len(features)
         pct = f"{100 * n_vis / n_tot:.1f}%" if n_tot else "n/a"
         logger.info(f"Saved Complete. ({n_vis}/{n_tot} cells visible, {pct})")
 
