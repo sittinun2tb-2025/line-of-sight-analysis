@@ -37,7 +37,7 @@ class ViewshedAnalysis:
         self.heritage_x, self.heritage_y = to_utm.transform(heritage_x, heritage_y)
         self.heritage_h = heritage_h        # ความสูงแหล่งศิลปกรรม 
         # Default Value ข้อมูลการมองเห็น
-        self.obs_eye_hight = 1.7            # ความสูงระดับการมองเห็นmeter
+        self.obs_eye_height = 1.7            # ความสูงระดับการมองเห็นmeter
         self.ground_z = 0.0
         self.radius_m = 250.0               # รัศมีการมองเห็น observation distance
         self.cell_size = 10.0               # ขนาดกริดที่ได้จากการวิเคราะห์
@@ -116,7 +116,7 @@ class ViewshedAnalysis:
 
         visible = np.ones(ox.size, dtype=np.int8)
 
-        end_obs, end_site = self.ground_z + self.obs_eye_hight, self.heritage_h
+        end_obs, end_site = self.ground_z + self.obs_eye_height, self.heritage_h
         h_lo, h_hi = min(end_obs, end_site), max(end_obs, end_site)
 
         pair_h = heights[geom_idx]
@@ -218,10 +218,6 @@ class ViewshedAnalysis:
         pct = f"{100 * n_vis / n_tot:.1f}%" if n_tot else "n/a"
         logger.info(f"Saved Complete. ({n_vis}/{n_tot} cells visible, {pct})")
 
-
-    def plot_result_rect(self):
-        pass
-
     def main(self, GRID_TYPE):
         site_pt = Point(self.heritage_x, self.heritage_y)
         self.list_buff_bld = [b for b in self.list_bld if b["geom"].distance(site_pt) <= self.radius_m + self.BUILDING_SEARCH_MARGIN]
@@ -231,8 +227,10 @@ class ViewshedAnalysis:
             self.grid_x, self.grid_y, self.visible_rect = self.compute_viewshed_rect()
         elif GRID_TYPE == "Hexagonal":
             self.hx, self.hy, self.hex_r, self.visible_hex = self.compute_viewshed_hex()
+        else:
+            raise ValueError(f"unknown GRID_TYPE: {GRID_TYPE}")
         # plot show result
-        self.plot_result_rect()
+        #self.plot_result_rect()
 
 
 
@@ -244,14 +242,14 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     # ข้อมูลแหล่งศิลปกรรม
     HERITAGE_SITE = (100.5175699, 13.7185468)
-    HERITAGE_HIEGHT = 40.0
+    HERITAGE_HEIGHT = 40.0
     # ข้อมูลขอบเขตอาคาร (reproject เป็น UTM 32647 และซ่อม geometry invalid ไว้ล่วงหน้าแล้ว)
     file_osm_bld = "bkk_footprints_utm_fixed.geojson"
     dir_osm_bld = os.path.join(dir_app, file_osm_bld)
     # รูปแบบการแสดงผล
     grids_type = "Hexagonal" # Rectangle or Hexagonal
 
-    analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HIEGHT)
+    analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HEIGHT)
     analysis.load_building(dir_osm_bld)
     analysis.main(grids_type)
 

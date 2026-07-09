@@ -1,7 +1,7 @@
 #Viewshed analysis (binary) + DEM: visible / not-visible areas around a heritage site
 #================================================================================
 # เหมือน run-demo.py แต่วิเคราะห์ร่วมกับ DEM (พื้นดินต่างระดับจริง):
-#   - ตา observer   = ground(DEM ที่ cell) + obs_eye_hight      (ต่างกันทุก cell)
+#   - ตา observer   = ground(DEM ที่ cell) + obs_eye_height      (ต่างกันทุก cell)
 #   - ยอด heritage  = ground(DEM ที่ site) + heritage_h
 #   - ยอดตึก        = ground(DEM ที่ตึก, sample ตอนโหลด) + AGL
 # ทุกความสูงเทียบกันบนฐาน absolute elevation (m MSL) แทน flat-terrain assumption
@@ -57,7 +57,7 @@ class ViewshedAnalysis:
         self.heritage_x, self.heritage_y = to_utm.transform(heritage_x, heritage_y)
         self.heritage_h = heritage_h        # ความสูงแหล่งศิลปกรรม (เหนือพื้นดินที่ site)
         # Default Value ข้อมูลการมองเห็น
-        self.obs_eye_hight = 1.7            # ความสูงระดับการมองเห็น meter (เหนือพื้นดิน)
+        self.obs_eye_height = 1.7            # ความสูงระดับการมองเห็น meter (เหนือพื้นดิน)
         self.radius_m = 250.0               # รัศมีการมองเห็น observation distance
         self.cell_size = 10.0               # ขนาดกริดที่ได้จากการวิเคราะห์
         self.list_bld = []
@@ -206,7 +206,7 @@ class ViewshedAnalysis:
         visible = np.ones(ox.size, dtype=np.int8)
 
         # ปลายเส้นสายตาสองข้าง: ฝั่ง observer ต่างกันทุก cell ตามพื้นดินใต้เท้า
-        end_obs = self.ground_at(ox, oy) + self.obs_eye_hight   # array ต่อ cell
+        end_obs = self.ground_at(ox, oy) + self.obs_eye_height   # array ต่อ cell
         end_site = self.heritage_ground + self.heritage_h        # scalar
 
         # ความสูงเส้นสายตาแต่ละคู่ (เส้น, ตึก) แกว่งอยู่ระหว่างปลายสองข้างเสมอ:
@@ -325,13 +325,15 @@ class ViewshedAnalysis:
             self.grid_x, self.grid_y, self.visible_rect = self.compute_viewshed_rect()
         elif GRID_TYPE == "Hexagonal":
             self.hx, self.hy, self.hex_r, self.visible_hex = self.compute_viewshed_hex()
+        else:
+            raise ValueError(f"unknown GRID_TYPE: {GRID_TYPE}")
 
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     # ข้อมูลแหล่งศิลปกรรม
     HERITAGE_SITE = (100.5175699, 13.7185468)
-    HERITAGE_HIEGHT = 40.0
+    HERITAGE_HEIGHT = 40.0
     # ข้อมูลขอบเขตอาคาร (reproject เป็น UTM 32647 และซ่อม geometry invalid ไว้ล่วงหน้าแล้ว)
     file_osm_bld = "bkk_footprints_utm_fixed.geojson"
     dir_osm_bld = os.path.join(dir_app, file_osm_bld)
@@ -341,7 +343,7 @@ if __name__ == "__main__":
     # รูปแบบการแสดงผล
     grids_type = "Hexagonal" # Rectangle or Hexagonal
 
-    analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HIEGHT)
+    analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HEIGHT)
     analysis.load_building(dir_osm_bld)
     analysis.load_dem(dir_dem)
     analysis.main(grids_type)
