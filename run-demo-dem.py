@@ -69,6 +69,7 @@ class ViewshedAnalysis:
         self.hx = None
         self.hy = None
         self.hex_r = None
+        self.hex_ids = None
         self.visible_hex = None
         # ข้อมูลระดับพื้นดินจาก DEM (ตั้งค่าโดย load_dem) — แทน flat-terrain assumption
         self.dem_data = None
@@ -173,15 +174,39 @@ class ViewshedAnalysis:
         keep = dist <= self.radius_m
         return hx[keep], hy[keep], dist[keep], hex_r
 
+    def observer_open_mask(self, ox, oy):
+        """True = จุด observer อยู่นอกตัวอาคาร (คนยืนได้จริง)
+        cell ที่ center ตกในตัวตึกไม่ใช่จุดยืนมองจริง — ตัดออกจากการวิเคราะห์
+        (ต้องเรียกหลังตั้ง list_buff_bld แล้ว)"""
+        geoms = np.array([b["geom"] for b in self.list_buff_bld], dtype=object)
+        tree = STRtree(geoms)
+        pi, _ = tree.query(shapely.points(ox, oy), predicate="within")
+        open_mask = np.ones(ox.size, dtype=bool)
+        open_mask[np.unique(pi)] = False
+        logger.info(f"Excluded {int((~open_mask).sum())} / {ox.size} cells inside building "
+                    f"footprints ({open_mask.sum()} observer cells remain)")
+        return open_mask
+
     def compute_viewshed_rect(self):
         grid_x, grid_y, dist = self.build_rect_grid()
         in_radius = dist <= self.radius_m
-        visible = np.full(grid_x.shape, -1, dtype=np.int8)   # -1 = outside AOI
-        visible[in_radius] = self.compute_visibility(grid_x[in_radius], grid_y[in_radius], dist[in_radius])
+        # -1 = นอกรัศมีศึกษา หรือ center อยู่ในตัวตึก (ไม่วิเคราะห์/ไม่ export)
+        visible = np.full(grid_x.shape, -1, dtype=np.int8)
+        ox, oy, od = grid_x[in_radius], grid_y[in_radius], dist[in_radius]
+        open_mask = self.observer_open_mask(ox, oy)
+        vis_sub = np.full(ox.size, -1, dtype=np.int8)
+        vis_sub[open_mask] = self.compute_visibility(ox[open_mask], oy[open_mask], od[open_mask])
+        visible[in_radius] = vis_sub
         return grid_x, grid_y, visible
 
     def compute_viewshed_hex(self):
         hx, hy, hd, hex_r = self.build_hex_grid()
+        # เก็บ index เดิมไว้เป็น grid_id ก่อนตัด cell ในตัวตึกออก
+        # เพื่อให้ grid_id ของ cell ที่เหลือคงที่ เทียบกับผลเวอร์ชันก่อน ๆ ได้
+        ids = np.arange(hx.size)
+        open_mask = self.observer_open_mask(hx, hy)
+        hx, hy, hd = hx[open_mask], hy[open_mask], hd[open_mask]
+        self.hex_ids = ids[open_mask]
         visible = self.compute_visibility(hx, hy, hd)
         return hx, hy, hex_r, visible
 
@@ -260,7 +285,7 @@ class ViewshedAnalysis:
         elif self.visible_hex is not None:
             # Hexagonal grid: หกเหลี่ยม flat-top 6 มุม (vertex ที่มุม 0, 60, ..., 300 องศา
             # รอบ center = ทวนเข็ม และ orientation ตรงกับ build_hex_grid)
-            grid_ids = np.arange(self.visible_hex.size)   # hex กรองในรัศมีไว้แล้ว ไม่มีค่า -1
+            grid_ids = self.hex_ids   # index เดิมก่อนตัด cell ในตัวตึก = PK คงที่
             vis_vals = self.visible_hex
             cx, cy = self.hx, self.hy
             angles = np.deg2rad(np.arange(0, 360, 60))

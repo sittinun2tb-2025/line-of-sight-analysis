@@ -1,20 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""One-time prep (รันใหม่เมื่อข้อมูลต้นทางเปลี่ยน):
-
-1) อาคาร: reproject bkk_footprints.geojson เป็น EPSG:32647 และซ่อม geometry
-   invalid (buffer(0) เฉพาะตัวที่พัง) -> bkk_footprints_utm_fixed.geojson
-   เพื่อให้ load_building() ของ run-demo*.py ไม่ต้องจ่ายต้นทุนนี้ทุกครั้ง
-
-2) ถนน/ทางเดินจาก OSM: ดาวน์โหลดโครงข่าย network_type="walk" ด้วย osmnx
-   ในกรอบเดียวกับข้อมูลอาคาร reproject เป็น EPSG:32647
-   -> osm_roads_utm.geojson  (สำหรับกรอง observer ให้อยู่บนพื้นที่สาธารณะ)
-   ขั้นนี้ต้องต่ออินเทอร์เน็ต (Overpass API) — ถ้าโหลดไม่ได้จะเตือนแล้วข้าม
-   ไม่กระทบการเตรียมข้อมูลอาคาร
-   ข้อมูล © OpenStreetMap contributors (ODbL)
-
-หมายเหตุ: dem.tif (DEM crop ตามพื้นที่ศึกษา) ผู้ใช้เป็นคนจัดเตรียมเอง
-"""
 
 import json
 import os
@@ -27,7 +12,7 @@ from pyproj import Transformer
 dir_app = os.path.dirname(os.path.abspath(__file__))
 SRC_PATH = os.path.join(dir_app, "bkk_footprints.geojson")            # WGS84 lon/lat
 OUT_PATH = os.path.join(dir_app, "bkk_footprints_utm_fixed.geojson")  # EPSG:32647, valid
-OSM_OUT_PATH = os.path.join(dir_app, "osm_roads_utm.geojson")         # EPSG:32647, walk network
+OSM_OUT_PATH = os.path.join(dir_app, "bkk_osm_roads_utm.geojson")         # EPSG:32647, walk network
 UTM_EPSG = "EPSG:32647"
 OSM_BBOX_MARGIN_DEG = 0.001    # ขยายกรอบดึง OSM เผื่อขอบ (~110 ม.)
 

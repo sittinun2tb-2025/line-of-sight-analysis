@@ -79,6 +79,12 @@ class SensitivityAnalysis:
         else:
             raise ValueError(f"unknown GRID_TYPE: {GRID_TYPE}")
 
+        # ตัด cell ที่ center อยู่ในตัวตึกออก (คนยืนมองตรงนั้นไม่ได้จริง)
+        # grid_ids ของ cell ที่เหลือคงเดิม จึงยัง join กับผลเวอร์ชันก่อน ๆ ได้
+        open_mask = a.observer_open_mask(self.ox, self.oy)
+        self.ox, self.oy, self.od = self.ox[open_mask], self.oy[open_mask], self.od[open_mask]
+        self.grid_ids = self.grid_ids[open_mask]
+
         # ---- งานเรขาคณิต ทำครั้งเดียว (mirror ส่วนต้นของ compute_visibility) ----
         t0 = time.time()
         geoms = np.array([b["geom"] for b in a.list_buff_bld], dtype=object)
