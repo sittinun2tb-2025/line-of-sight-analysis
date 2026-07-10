@@ -8,3 +8,6 @@ __pycache__/
 
 # ไฟล์สถิติ raster ที่ QGIS/GDAL สร้างอัตโนมัติตอนเปิดไฟล์ .tif
 *.aux.xml
+
+# Overpass API response cache ของ osmnx (สร้างใหม่ได้เสมอ)
+cache/

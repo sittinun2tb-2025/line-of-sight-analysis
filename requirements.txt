@@ -3,3 +3,4 @@ matplotlib
 pyproj
 shapely>=2.0
 rasterio    # เฉพาะ run-demo-dem.py (วิเคราะห์ร่วมกับ DEM)
+osmnx       # เฉพาะ prepare_utm_fixed_geojson.py (ดึงโครงข่ายถนนจาก OSM)
