@@ -216,7 +216,7 @@ if __name__ == "__main__":
     # รูปแบบ grid และพารามิเตอร์ Monte Carlo
     grids_type = "Hexagonal"      # Rectangle or Hexagonal
     N_RUNS = 200                  # จำนวนรอบสุ่ม (ความละเอียดของ p = 1/N_RUNS)
-    AGL_ERROR_M = 2.0             # ความคลาดเคลื่อนความสูงตึกที่สมมติ (uniform ±)
+    AGL_ERROR_M = 2.0             # +-ความคลาดเคลื่อนความสูงตึกที่สมมติ (uniform ±)
     SEED = 42                     # ล็อกไว้เพื่อให้ผลทำซ้ำได้
     # ผลการวิเคราะห์
     dir_output = os.path.join(dir_app, "viewshed_sensitivity_result.geojson")

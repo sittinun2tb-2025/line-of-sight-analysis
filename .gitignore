@@ -5,3 +5,6 @@ SRTM15p_v21_Thai.tif
 
 __pycache__/
 *.pyc
+
+# ไฟล์สถิติ raster ที่ QGIS/GDAL สร้างอัตโนมัติตอนเปิดไฟล์ .tif
+*.aux.xml
