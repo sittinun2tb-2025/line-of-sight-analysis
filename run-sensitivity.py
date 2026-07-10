@@ -216,9 +216,10 @@ if __name__ == "__main__":
     # ข้อมูลแหล่งศิลปกรรม
     HERITAGE_SITE = (100.5175699, 13.7185468)
     HERITAGE_HEIGHT = 40.0
-    # ข้อมูลขอบเขตอาคาร + DEM (เตรียมไว้ล่วงหน้าแล้ว)
+    # ข้อมูลขอบเขตอาคาร + DEM + โครงข่ายทางสาธารณะ (เตรียมไว้ล่วงหน้าแล้ว)
     dir_osm_bld = os.path.join(dir_app, "bkk_footprints_utm_fixed.geojson")
     dir_dem = os.path.join(dir_app, "dem.tif")
+    dir_osm_roads = os.path.join(dir_app, "bkk_osm_roads_utm.geojson")
     # รูปแบบ grid และพารามิเตอร์ Monte Carlo
     grids_type = "Hexagonal"      # Rectangle or Hexagonal
     N_RUNS = 200                  # จำนวนรอบสุ่ม (ความละเอียดของ p = 1/N_RUNS)
@@ -230,6 +231,7 @@ if __name__ == "__main__":
     analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HEIGHT)
     analysis.load_building(dir_osm_bld)
     analysis.load_dem(dir_dem)
+    analysis.load_osm_roads(dir_osm_roads)
 
     sens = SensitivityAnalysis(analysis, n_runs=N_RUNS, agl_error_m=AGL_ERROR_M, seed=SEED)
     sens.prepare(grids_type)

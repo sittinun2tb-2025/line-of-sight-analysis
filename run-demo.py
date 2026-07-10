@@ -52,6 +52,31 @@ class ViewshedAnalysis:
         self.hex_r = None
         self.hex_ids = None
         self.visible_hex = None
+        # พื้นที่สาธารณะจากโครงข่าย OSM (ตั้งค่าโดย load_osm_roads — optional)
+        self.public_space_tree = None
+
+    # ระยะ buffer จาก centerline ต่อประเภททาง (เมตร) — OSM แทบไม่ระบุความกว้างจริง
+    # จึงประมาณครึ่งความกว้างเขตทาง (ผิวจราจร+ทางเท้า) ต่อ class เป็นสมมติฐานที่ต้องประกาศในรายงาน
+    OSM_BUFFER_M = {
+        "primary": 10.0, "secondary": 8.0, "tertiary": 6.0,
+        "residential": 5.0, "unclassified": 5.0, "living_street": 5.0,
+        "service": 4.0, "pedestrian": 4.0, "footway": 3.0, "path": 3.0, "steps": 3.0,
+    }
+    OSM_BUFFER_DEFAULT_M = 4.0
+
+    def load_osm_roads(self, dir_osm_roads):
+        """โหลดโครงข่ายถนน/ทางเดิน (EPSG:32647 จาก prepare_utm_fixed_geojson.py)
+        แล้ว buffer ตามประเภททาง = เขต 'พื้นที่สาธารณะที่ยืนได้' สำหรับกรอง observer"""
+        with open(pb.Path(dir_osm_roads), encoding="utf-8") as f:
+            text = f.read()
+        geoms = shapely.get_parts(shapely.from_geojson(text))
+        feats = json.loads(text)["features"]
+        widths = np.array([self.OSM_BUFFER_M.get(
+            (f["properties"].get("highway") or "").split("|")[0], self.OSM_BUFFER_DEFAULT_M)
+            for f in feats])
+        self.public_space_tree = STRtree(shapely.buffer(geoms, widths))
+        logger.info(f"OSM public space: {len(geoms)} edges buffered "
+                    f"({widths.min():.0f}-{widths.max():.0f} m by highway class)")
 
     def load_building(self, dir_osm_bld):
         # column: geom(32647), height
@@ -90,16 +115,32 @@ class ViewshedAnalysis:
         return hx[keep], hy[keep], dist[keep], hex_r
 
     def observer_open_mask(self, ox, oy):
-        """True = จุด observer อยู่นอกตัวอาคาร (คนยืนได้จริง)
-        cell ที่ center ตกในตัวตึกไม่ใช่จุดยืนมองจริง — ตัดออกจากการวิเคราะห์
+        """True = จุด observer ยืนได้จริง: (1) อยู่นอกตัวอาคาร และ
+        (2) ถ้าโหลดโครงข่าย OSM ไว้ (load_osm_roads) ต้องอยู่ในเขตพื้นที่สาธารณะด้วย
         (ต้องเรียกหลังตั้ง list_buff_bld แล้ว)"""
-        geoms = np.array([b["geom"] for b in self.list_buff_bld], dtype=object)
-        tree = STRtree(geoms)
-        pi, _ = tree.query(shapely.points(ox, oy), predicate="within")
+        pts = shapely.points(ox, oy)
         open_mask = np.ones(ox.size, dtype=bool)
-        open_mask[np.unique(pi)] = False
-        logger.info(f"Excluded {int((~open_mask).sum())} / {ox.size} cells inside building "
-                    f"footprints ({open_mask.sum()} observer cells remain)")
+
+        # ชั้น 1: ตัด cell ที่ center อยู่ในตัวตึก
+        geoms = np.array([b["geom"] for b in self.list_buff_bld], dtype=object)
+        pi, _ = STRtree(geoms).query(pts, predicate="within")
+        in_bld = np.zeros(ox.size, dtype=bool)
+        in_bld[np.unique(pi)] = True
+        open_mask &= ~in_bld
+
+        # ชั้น 2: เหลือเฉพาะ cell บนพื้นที่สาธารณะ (ถนน/ทางเดิน buffer แล้ว)
+        n_off_public = 0
+        if self.public_space_tree is not None:
+            pi, _ = self.public_space_tree.query(pts, predicate="within")
+            on_public = np.zeros(ox.size, dtype=bool)
+            on_public[np.unique(pi)] = True
+            n_off_public = int((open_mask & ~on_public).sum())
+            open_mask &= on_public
+
+        msg = f"Observer mask: {ox.size} cells -> excluded {int(in_bld.sum())} in buildings"
+        if self.public_space_tree is not None:
+            msg += f", {n_off_public} outside public space"
+        logger.info(msg + f"; {int(open_mask.sum())} remain")
         return open_mask
 
     def compute_viewshed_rect(self):
@@ -259,11 +300,15 @@ if __name__ == "__main__":
     # ข้อมูลขอบเขตอาคาร (reproject เป็น UTM 32647 และซ่อม geometry invalid ไว้ล่วงหน้าแล้ว)
     file_osm_bld = "bkk_footprints_utm_fixed.geojson"
     dir_osm_bld = os.path.join(dir_app, file_osm_bld)
+    # โครงข่ายถนน/ทางเดินสาธารณะจาก OSM (เตรียมด้วย prepare_utm_fixed_geojson.py)
+    file_osm_roads = "bkk_osm_roads_utm.geojson"
+    dir_osm_roads = os.path.join(dir_app, file_osm_roads)
     # รูปแบบการแสดงผล
     grids_type = "Hexagonal" # Rectangle or Hexagonal
 
     analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HEIGHT)
     analysis.load_building(dir_osm_bld)
+    analysis.load_osm_roads(dir_osm_roads)
     analysis.main(grids_type)
 
 
