@@ -85,7 +85,19 @@ class SensitivityAnalysis:
         self.ox, self.oy, self.od = self.ox[open_mask], self.oy[open_mask], self.od[open_mask]
         self.grid_ids = self.grid_ids[open_mask]
 
+        self._prepare_geometry()
+
+    def prepare_points(self, ox, oy, od, grid_ids):
+        """เวอร์ชันสำหรับ observer ชุดใดก็ได้ (เช่น จุดตามแนวถนนของ route analysis)
+        ผู้เรียกต้องตั้ง a.list_buff_bld (ตึกที่เป็น blocker ได้) ให้ครอบระยะจุดไกลสุดเอง"""
+        self.grid_type = "Points"
+        self.ox, self.oy, self.od = ox, oy, od
+        self.grid_ids = grid_ids
+        self._prepare_geometry()
+
+    def _prepare_geometry(self):
         # ---- งานเรขาคณิต ทำครั้งเดียว (mirror ส่วนต้นของ compute_visibility) ----
+        a = self.a
         t0 = time.time()
         geoms = np.array([b["geom"] for b in a.list_buff_bld], dtype=object)
         self.msl = np.array([b["msl"] for b in a.list_buff_bld])
@@ -178,10 +190,13 @@ class SensitivityAnalysis:
             cx, cy = self.ox, self.oy
             corner_x = np.stack([cx - half, cx + half, cx + half, cx - half], axis=1)
             corner_y = np.stack([cy - half, cy - half, cy + half, cy + half], axis=1)
-        else:   # Hexagonal (flat-top, ทวนเข็ม — orientation ตรงกับ build_hex_grid)
+        elif self.grid_type == "Hexagonal":   # flat-top, ทวนเข็ม — orientation ตรงกับ build_hex_grid
             angles = np.deg2rad(np.arange(0, 360, 60))
             corner_x = self.ox[:, None] + self.hex_r * np.cos(angles)[None, :]
             corner_y = self.oy[:, None] + self.hex_r * np.sin(angles)[None, :]
+        else:
+            raise ValueError("export_geojson รองรับเฉพาะ grid Rectangle/Hexagonal — "
+                             "โหมด Points (route) ให้ export จากสคริปต์ route เอง")
 
         n_corners = corner_x.shape[1]
         lons, lats = to_wgs.transform(corner_x.ravel(), corner_y.ravel())

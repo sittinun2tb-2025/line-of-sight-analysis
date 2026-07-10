@@ -1,0 +1,117 @@
+﻿name,highway,n_points,n_visible,pct_visible
+"(unnamed)",footway,3266,536,16.4
+"(unnamed)",service,1676,234,14.0
+"(unnamed)",residential,810,81,10.0
+"ถนนสาทรใต้",primary,288,218,75.7
+"ถนนสาทรเหนือ",primary,222,43,19.4
+"ถนนสีลม",footway,199,7,3.5
+"ถนนเจริญกรุง",secondary,164,0,0.0
+"(unnamed)",path,142,2,1.4
+"ถนนปั้น",tertiary,138,0,0.0
+"ถนนเจริญราษฎร์",primary,124,72,58.1
+"ซอยเจริญกรุง 40",footway,102,0,0.0
+"ซอยสีลม 21",residential,96,10,10.4
+"ซอยเจริญกรุง 42",residential,92,0,0.0
+"ซอยเจริญกรุง 57",unclassified,92,12,13.0
+"ซอยสาทร 15",residential,84,8,9.5
+"ซอยปราโมทย์ 1",residential,78,0,0.0
+"ซอยเจริญกรุง 47/3",footway,78,0,0.0
+"ถนนสุรวงศ์",footway,74,0,0.0
+"ซอยสีลม 19",footway,74,0,0.0
+"ทางลัดถนนสาทรเหนือ-ถนนสุรวงศ์",tertiary,70,0,0.0
+"ซอยเจริญราษฏร์ 1",residential,68,15,22.1
+"ถนนเจริญเวียง",residential,66,1,1.5
+"ซอยปราโมทย์ 3",residential,66,0,0.0
+"ซอยปราโมทย์ 2",residential,66,0,0.0
+"ถนนเจริญกรุง",footway,66,0,0.0
+"(unnamed)",steps|footway,60,16,26.7
+"ถนนมเหสักข์",footway,56,0,0.0
+"(unnamed)",steps,55,23,41.8
+"ถนนจรูญเวียง",residential,50,0,0.0
+"ซอยเจริญกรุง 55",path,50,0,0.0
+"ซอยสีลม 26",residential,50,0,0.0
+"ซอยเจริญราษฎร์ 1 แยก 9",residential,48,0,0.0
+"ซอยโทรคาเดโร",service,48,0,0.0
+"ซอยสาทร 21",residential,46,28,60.9
+"ซอยศาลเจ้าเจียวเองเบี้ยว",residential,44,0,0.0
+"ซอยสีลม 23",residential,44,42,95.5
+"(unnamed)",path|footway,44,16,36.4
+"ซอยเจริญกรุง 46",residential,42,0,0.0
+"ซอยสาทร 17",residential,42,37,88.1
+"ซอยเจริญกรุง 44",residential,40,0,0.0
+"ซอยปราโมทย์ 2/1",path,38,0,0.0
+"ซอยเจริญกรุง 53",service|residential,38,2,5.3
+"ซอยสีลม 19|ถนนสีลม",footway,38,0,0.0
+"ตรอกโอเรียนเต็ล",residential,36,0,0.0
+"ซอยสีลม 34|ซอยมเหสักข์ 3",residential,36,0,0.0
+"(unnamed)",service|residential,35,0,0.0
+"ซอยเจริญกรุง 50",residential,34,0,0.0
+"ตรอกชาเตอร์แบงค์",residential,34,0,0.0
+"ซอยเจริญกรุง 38",residential,34,0,0.0
+"ซอยมเหสักข์ 1",residential,32,0,0.0
+"ซอยมเหสักข์ 2",residential,32,0,0.0
+"ซอยสาทร 19",path,30,14,46.7
+"ซอยสีลม 30",service,30,0,0.0
+"Charoen Rat Soi 1",residential,28,14,50.0
+"ซอยเจริญกรุง 59",residential,28,0,0.0
+"ซอยสีลม 22",residential,28,0,0.0
+"ซอยสีลม 20",residential,26,0,0.0
+"ซอยสีลม 34 (ใหม่)",residential,26,6,23.1
+"ซอยเจริญกรุง 51",residential,26,0,0.0
+"ซอยสีลม 30",residential,24,0,0.0
+"ซอยเจริญกรุง 36",residential,24,0,0.0
+"ถนนเจริญกรุง|ซอยเจริญกรุง 36",secondary|residential,24,0,0.0
+"ซอยบ้านอู่|ซอยเจริญกรุง 46",residential,22,0,0.0
+"ซอยสาทร 15 แยก 2",residential,22,0,0.0
+"ซอยสีลม 22/1",service,22,0,0.0
+"ตรอกโต๊ะ",service,22,0,0.0
+"ซอยเจริญกรุง 49",residential,22,0,0.0
+"ซอยเจรืญกรุง 42",service|residential,22,0,0.0
+"ซอยสาทร 23",residential,22,7,31.8
+"ซอยสีลม 20|ถนนสีลม",footway,22,0,0.0
+"ซอยสาทร 15 แยก 4",residential,21,0,0.0
+"ซอยสีลม 18",service,20,0,0.0
+"ซอยสีลม 15",service,20,0,0.0
+"ซอยเจริญกรุง 36",service|residential,20,0,0.0
+"ซอยปราโมทย์",service,20,0,0.0
+"ซอยสาทร 16",residential,20,0,0.0
+"ซอยสาทร 19",path|residential,20,1,5.0
+"ซอยสาทร 13 แยก 6",residential,18,0,0.0
+"ซอยสีลม 17",service,18,0,0.0
+"(unnamed)",path|residential,18,2,11.1
+"ซอยสีลม 22/1|ถนนสีลม",footway,18,0,0.0
+"ซอยบ้านอู่",residential,16,0,0.0
+"(unnamed)",service|footway,16,0,0.0
+"ซอยสาทร 13 แยก 8",residential,16,0,0.0
+"ซอยมัสยิดฮารูณ",footway,16,0,0.0
+"ถนนเจริญกรุง|ซอยเจริญกรุง 51",secondary|residential,14,0,0.0
+"ซอยเจริญราษฎร์ 1 แยก 2",residential,14,0,0.0
+"ซอยเจริญกรุง 47/1|ซอยเจริญกรุง 47/2",residential,14,0,0.0
+"ซอยเจริญกรุง 47/2|ซอยเจริญกรุง 47/1",residential,14,0,0.0
+"สิริสแควร์",pedestrian,12,6,50.0
+"ซอยปราโมทย์",residential,12,0,0.0
+"ซอยปราโมทย์ 1/1",service,12,0,0.0
+"ซอยสาทร 15 แยก 1",residential,10,0,0.0
+"ซอยสีลม 28",service,10,0,0.0
+"ซอยสีลม 34",residential,10,0,0.0
+"ซอยเจริญกรุง 42/1",residential,8,0,0.0
+"ซอยสีลม 20|ซอยสีลม 22|ถนนสีลม",footway,8,0,0.0
+"ถนนเจริญกรุง|ซอยเจริญกรุง 50",secondary|residential,8,0,0.0
+"ซอยเจริญกรุง 49",footway|residential,6,0,0.0
+"(unnamed)",residential|footway,6,3,50.0
+"ซอยสีลม 22|ถนนสีลม",footway,6,0,0.0
+"ถนนปั้น",footway,6,0,0.0
+"ซอยเจริญกรุง 49",residential|footway,6,0,0.0
+"(unnamed)",footway|residential,6,3,50.0
+"ซอยเจริญกรุง 53",residential,4,0,0.0
+"ซอยมเหสักข์ 3",residential,4,0,0.0
+"ซอยเจริญกรุง 47/2",residential,4,0,0.0
+"ซอยสีลม 13",residential,4,0,0.0
+"ทางลัดถนนสาทรเหนือ-ถนนสุรวงศ์",tertiary|tertiary_link,4,4,100.0
+"ซอยเจริญกรุง 47/1",residential,4,0,0.0
+"ถนนมเหสักข์|ถนนสีลม",footway,4,0,0.0
+"ทางลัดถนนสาทรเหนือ-ถนนสุรวงศ์",tertiary_link|tertiary,4,4,100.0
+"ซอยเจริญกรุง 49",footway,3,0,0.0
+"ซอยวัดม่วงแค",service,2,0,0.0
+"ถนนเจริญกรุง|ซอยเจริญกรุง 47/3",footway,2,0,0.0
+"ซอยเจริญกรุง 47/3|ถนนเจริญกรุง",footway,2,0,0.0
