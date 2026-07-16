@@ -235,20 +235,19 @@ if __name__ == "__main__":
     dir_osm_bld = os.path.join(dir_app, "bkk_footprints_utm_fixed.geojson")
     dir_dem = os.path.join(dir_app, "dem.tif")
     dir_osm_roads = os.path.join(dir_app, "bkk_osm_roads_utm.geojson")
-    # รูปแบบ grid และพารามิเตอร์ Monte Carlo
     grids_type = "Hexagonal"      # Rectangle or Hexagonal
-    N_RUNS = 200                  # จำนวนรอบสุ่ม (ความละเอียดของ p = 1/N_RUNS)
-    AGL_ERROR_M = 2.0             # +-ความคลาดเคลื่อนความสูงตึกที่สมมติ (uniform ±)
-    SEED = 42                     # ล็อกไว้เพื่อให้ผลทำซ้ำได้
     # ผลการวิเคราะห์
-    dir_output = os.path.join(dir_app, "viewshed_sensitivity_result.geojson")
-
     analysis = ViewshedAnalysis(HERITAGE_SITE[0], HERITAGE_SITE[1], HERITAGE_HEIGHT)
     analysis.load_building(dir_osm_bld)
     analysis.load_dem(dir_dem)
     analysis.load_osm_roads(dir_osm_roads)
 
+    # วิเคราะห์ความน่าจะเป็นที่มีโอกาสมองเห็น เพราะมีความคลาดเคลื่อนความสูงอาคาร
+    N_RUNS = 200                  # จำนวนรอบสุ่ม (ความละเอียดของ p = 1/N_RUNS)
+    AGL_ERROR_M = 2.0             # +-ความคลาดเคลื่อนความสูงตึกที่สมมติ (uniform ±)
+    SEED = 42                     # ล็อกไว้เพื่อให้ผลทำซ้ำได้
+    dir_output_sens = os.path.join(dir_app, "viewshed_sensitivity_result.geojson")
     sens = SensitivityAnalysis(analysis, n_runs=N_RUNS, agl_error_m=AGL_ERROR_M, seed=SEED)
     sens.prepare(grids_type)
     sens.run()
-    sens.export_geojson(dir_output)
+    sens.export_geojson(dir_output_sens)

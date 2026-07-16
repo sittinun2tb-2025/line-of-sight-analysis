@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<title>Viewshed Result — การมองเห็นแหล่งศิลปกรรม</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+<style>
+  html, body, #map { height: 100%; margin: 0; padding: 0; }
+  #panel {
+    position: absolute; top: 12px; left: 12px; z-index: 1; max-width: 260px;
+    background: rgba(255,255,255,0.94); padding: 12px 14px; border-radius: 8px;
+    font: 13px/1.5 "Leelawadee UI", sans-serif; box-shadow: 0 1px 6px rgba(0,0,0,0.25);
+  }
+  #panel h1 { font-size: 15px; margin: 0 0 6px; color: #0B2E26; }
+  #panel .sub { color: #5F6E68; margin-bottom: 10px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+  .swatch { width: 16px; height: 16px; border-radius: 3px; flex: none; }
+  #err { color: #993C1D; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="panel">
+  <h1>การมองเห็นแหล่งศิลปกรรม</h1>
+  <div class="sub" id="sub">กำลังโหลด&hellip;</div>
+  <div class="legend-row"><span class="swatch" style="background:#C9C6BE"></span> ถูกบัง (weight 0)</div>
+  <div class="legend-row"><span class="swatch" style="background:#C0DD97"></span> ไกล แต่ยังเห็น (1)</div>
+  <div class="legend-row"><span class="swatch" style="background:#97C459"></span> weight 2</div>
+  <div class="legend-row"><span class="swatch" style="background:#5DCAA5"></span> weight 3</div>
+  <div class="legend-row"><span class="swatch" style="background:#1D9E75"></span> weight 4</div>
+  <div class="legend-row"><span class="swatch" style="background:#0F6E56"></span> ใกล้ เห็นชัดสุด (5)</div>
+</div>
+<script>
+// ขอบเขตข้อมูล [minLng, minLat, maxLng, maxLat]
+const DATA_EXTENT = [100.515273, 13.716335, 100.519869, 13.720763];
+const HERITAGE = [100.5175699, 13.7185468];
+
+const map = new maplibregl.Map({
+  container: "map",
+  style: {
+    version: 8,
+    sources: {
+      osm: {
+        type: "raster",
+        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+        tileSize: 256, maxzoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+      }
+    },
+    layers: [{ id: "osm", type: "raster", source: "osm" }]
+  },
+  bounds: DATA_EXTENT,
+  fitBoundsOptions: { padding: 60 }
+});
+map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+map.on("load", async () => {
+  try {
+    const res = await fetch("viewshed_grid_result.geojson");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+
+    map.addSource("viewshed", { type: "geojson", data });
+    map.addLayer({
+      id: "viewshed-fill", type: "fill", source: "viewshed",
+      paint: {
+        "fill-color": [
+          "match", ["get", "weight"],
+          0, "#C9C6BE", 1, "#C0DD97", 2, "#97C459",
+          3, "#5DCAA5", 4, "#1D9E75", 5, "#0F6E56",
+          "#C9C6BE"
+        ],
+        "fill-opacity": 0.72,
+        "fill-outline-color": "rgba(255,255,255,0.55)"
+      }
+    });
+
+    // จุดแหล่งศิลปกรรม
+    map.addSource("site", { type: "geojson",
+      data: { type: "Feature", geometry: { type: "Point", coordinates: HERITAGE } } });
+    map.addLayer({ id: "site", type: "circle", source: "site",
+      paint: { "circle-radius": 7, "circle-color": "#D85A30",
+               "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
+
+    const n = data.features.length;
+    const vis = data.features.filter(f => f.properties.visible === 1).length;
+    document.getElementById("sub").innerHTML =
+      `${vis} / ${n} จุดมองเห็นแหล่ง (${(100*vis/n).toFixed(1)}%)<br/>สีเข้ม = ยิ่งใกล้ เห็นชัดขึ้น`;
+
+    const popup = new maplibregl.Popup({ closeButton: false });
+    map.on("mousemove", "viewshed-fill", (e) => {
+      map.getCanvas().style.cursor = "pointer";
+      const p = e.features[0].properties;
+      popup.setLngLat(e.lngLat)
+        .setHTML(`grid_id ${p.grid_id}<br/>visible: ${p.visible}<br/>weight: ${p.weight}`)
+        .addTo(map);
+    });
+    map.on("mouseleave", "viewshed-fill", () => { map.getCanvas().style.cursor = ""; popup.remove(); });
+  } catch (e) {
+    document.getElementById("sub").innerHTML =
+      `<span id="err">โหลดข้อมูลไม่สำเร็จ: ${e.message}</span><br/>รัน run-demo.py ก่อนเพื่อสร้างไฟล์ผลลัพธ์`;
+  }
+});
+</script>
+</body>
+</html>

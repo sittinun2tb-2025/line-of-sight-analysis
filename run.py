@@ -14,7 +14,7 @@ import shapely
 from shapely.geometry import Point, box
 from shapely.strtree import STRtree
 
-
+# https://osmbuildings.org/?lat=13.75249&lon=100.49351&zoom=16.0&tilt=30
 GEOJSON_PATH = "bkk_footprints.geojson"     # building footprints (WGS84 lon/lat)
 HEIGHT_FIELD = "AGL"                        # Above Ground Level ระยะความสูงจากพื้นดิน
 UTM_EPSG = "EPSG:32647"       
